@@ -1,14 +1,26 @@
-class LoansController < ActionController::API
-
-  rescue_from ActiveRecord::RecordNotFound do |exception|
-    render json: 'not_found', status: :not_found
-  end
+class LoansController < ApplicationController
 
   def index
-    render json: Loan.all
+    array_success_response(data: Loan.all, serializer: LoanSerializer)
   end
 
   def show
-    render json: Loan.find(params[:id])
+    success_response(data: Loan.find(params[:id]), serializer: LoanSerializer)
+  end
+
+  def create
+    loan = Loan.new(loan_params)
+
+    if loan.save
+      success_response(data: loan, serializer: LoanSerializer, status: :created)
+    else
+      error_response(errors: loan.errors.full_messages)
+    end
+  end
+
+  private
+
+  def loan_params
+    params.require(:loan).permit(:funded_amount)
   end
 end

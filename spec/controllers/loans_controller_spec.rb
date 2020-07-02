@@ -23,4 +23,27 @@ RSpec.describe LoansController, type: :controller do
       end
     end
   end
+
+  describe '#create' do
+    it 'responds with a 201' do
+      post :create, params: { loan: { funded_amount: 100.0 } }
+      expect(response).to have_http_status(:created)
+    end
+
+    it 'creates the loan' do
+      expect do
+        post :create, params: { loan: { funded_amount: 100.0 } }
+      end.to change { Loan.count }.from(0).to(1)
+    end
+
+    it 'responds with a 422 for invalid funded amount' do
+      post :create, params: { loan: { funded_amount: nil } }
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it 'responds with a 422 for negative funded amount' do
+      post :create, params: { loan: { funded_amount: -1000 } }
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
 end
